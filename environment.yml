@@ -1,0 +1,7 @@
+name: env_sar_calibration
+channels:
+  - terradue
+  - conda-forge
+dependencies:
+  - python
+  - click2cwl
