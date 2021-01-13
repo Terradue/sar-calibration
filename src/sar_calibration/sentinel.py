@@ -1,10 +1,9 @@
 import os
+import gdal
 from snapista import Graph, Operator
 
 
 def calibrate(item):
-
-    identifier = get_identifier(safe)
 
     g = Graph()
 
@@ -50,7 +49,7 @@ def calibrate(item):
     )
 
     g.add_node(
-        operator=Operator("Write", file=f"{identifier}_SIGMA0_DB", formatName="GeoTIFF-BigTIFF"),
+        operator=Operator("Write", file=f"{item.id}_SIGMA0_DB", formatName="GeoTIFF-BigTIFF"),
         node_id="write",
         source="terrain-correction",
     )

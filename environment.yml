@@ -7,3 +7,5 @@ dependencies:
   - click2cwl
   - pyyaml
   - snapista
+  - pystac
+  - gdal=3.1.4

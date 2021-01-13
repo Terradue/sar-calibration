@@ -1,7 +1,7 @@
 import pystac
-import .sentinel 
-import .kompsat 
-import .iceye
+from . import sentinel 
+from . import kompsat 
+from . import iceye
 
 
 class Calibrator:
