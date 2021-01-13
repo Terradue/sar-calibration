@@ -4,6 +4,9 @@ import logging
 import click
 from click2cwl import dump
 
+from .stachelp import get_item
+from .calibrator import Calibrator
+
 logging.basicConfig(stream=sys.stderr, 
                     level=logging.DEBUG,
                     format='%(asctime)s %(levelname)-8s %(message)s',
@@ -26,20 +29,26 @@ logging.basicConfig(stream=sys.stderr,
     type=click.Path(),
     required=True,
 )
-@click.option(
-    "--aoi",
-    "-a",
-    "aoi",
-    help="help for the area of interest",
-    required=True,
-)
 @click.pass_context
 def main(ctx, input_path, aoi):
 
     # dump the CWL and params (if requested)
     dump(ctx)
 
-    print(input_path, aoi)
+    if 'TMPDIR' in os.environ:
+        os.chdir(os.environ['TMPDIR'])
+
+    logging.info(os.path.join(input_reference, 'catalog.json'))
+
+    item = get_item(os.path.join(input_reference, 'catalog.json'))
+
+    output_dir = f'{item.id}'
+
+    os.mkdir(output_dir)
+
+    calibrator = Calibrator()
+
+    out_item = calibrator.calibrate(item)
 
     sys.exit(0)
 

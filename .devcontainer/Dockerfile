@@ -21,7 +21,9 @@ RUN groupadd --gid ${NB_GID} ${NB_USER}                                         
     useradd --comment "Default user" --create-home --gid ${NB_GID} --no-log-init --shell /bin/bash --uid ${NB_UID} ${NB_USER}       && \
     apt-get -qq update                                                                                                              && \
     apt-get -qq install --yes apt-utils                                                                                             && \
-    apt-get -qq install --yes --no-install-recommends ttf-dejavu wget make g++ sudo vim less unzip tree file  locales > /dev/null   && \
+    apt-get -qq install --yes --no-install-recommends                                                                                  \
+                                 ttf-dejavu wget make g++ sudo vim                                                                     \ 
+                                 less unzip tree file git locales > /dev/null                                                       && \
     apt-get -qq purge                                                                                                               && \
     apt-get -qq clean                                                                                                               && \
     rm -rf /var/lib/apt/lists/*                                                                                                     && \
@@ -53,5 +55,5 @@ ENV PATH=$NB_PYTHON_PREFIX/bin:$CONDA_DIR/bin:$PATH \
 ADD environment.yml /tmp/environment.yml
 
 RUN mamba env create -p ${NB_PYTHON_PREFIX} -f /tmp/environment.yml                                                                 && \
-    mamba clean --all -f -y                                                                                                         && \
-    rm -fr /tmp/environment.yml 
+    mamba clean --all -f -y                                                                                                        
+   
