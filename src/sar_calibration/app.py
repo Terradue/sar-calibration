@@ -15,7 +15,7 @@ logging.basicConfig(stream=sys.stderr,
 
 @click.command(
     short_help="short help",
-    help="help",
+    help="help!!",
     context_settings=dict(
         ignore_unknown_options=True,
         allow_extra_args=True,
