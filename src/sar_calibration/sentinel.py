@@ -1,9 +1,17 @@
 import os
 import gdal
+import logging 
+
 from snapista import Graph, Operator
 
+logging.basicConfig(stream=sys.stderr, 
+                    level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)-8s %(message)s',
+                    datefmt='%Y-%m-%dT%H:%M:%S')
 
 def calibrate(item):
+
+    logging(f'Calibrate Sentinel-1 GRD acquisition {item.id}')
 
     g = Graph()
 
@@ -11,7 +19,7 @@ def calibrate(item):
         operator=Operator(
             "Read", 
             formatName="SENTINEL-1", 
-            file=item.get_assets()['metadata'].get_absolute_href()
+            file=item.get_assets()['manifest'].get_absolute_href().replace('file://', '')
         ), 
         node_id="read"
     )

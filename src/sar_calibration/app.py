@@ -30,7 +30,7 @@ logging.basicConfig(stream=sys.stderr,
     required=True,
 )
 @click.pass_context
-def main(ctx, input_path, aoi):
+def main(ctx, input_path):
 
     # dump the CWL and params (if requested)
     dump(ctx)
@@ -38,9 +38,9 @@ def main(ctx, input_path, aoi):
     if 'TMPDIR' in os.environ:
         os.chdir(os.environ['TMPDIR'])
 
-    logging.info(os.path.join(input_reference, 'catalog.json'))
+    logging.info(os.path.join(input_path, 'catalog.json'))
 
-    item = get_item(os.path.join(input_reference, 'catalog.json'))
+    item = get_item(os.path.join(input_path, 'catalog.json'))
 
     output_dir = f'{item.id}'
 

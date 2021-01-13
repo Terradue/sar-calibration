@@ -4,13 +4,13 @@ from . import kompsat
 from . import iceye
 
 
-class Calibrator:
+class Calibrator(object):
 
     def calibrate(self, item, **kwargs):
     
         calibrator = get_calibrator(item)
     
-        return calibrator(input, **kwargs)
+        return calibrator(item, **kwargs)
 
 
 def get_calibrator(item):
@@ -34,14 +34,14 @@ def get_calibrator(item):
         raise ValueError(mission)
 
 
-def _calibrate_sentinel(**kwargs):
+def _calibrate_sentinel(item, **kwargs):
 
-    return sentinel.calibrate
+    return sentinel.calibrate(item, **kwargs)
 
-def _calibrate_kompsat(**kwargs):
+def _calibrate_kompsat(item, **kwargs):
 
-    return kompsat.calibrate
+    return kompsat.calibrate(item, **kwargs)
 
-def _calibrate_iceye(**kwargs):
+def _calibrate_iceye(item, **kwargs):
 
-    return iceye.calibrate
+    return iceye.calibrate(item, **kwargs)
