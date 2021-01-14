@@ -2,7 +2,7 @@ import pystac
 from . import sentinel 
 from . import kompsat 
 from . import iceye
-
+from . import saocom
 
 class Calibrator(object):
 
@@ -22,7 +22,8 @@ def get_calibrator(item):
     calibrators['sentinel-1'] = _calibrate_sentinel
     calibrators['kompsat5'] = _calibrate_kompsat
     calibrators['iceye'] = _calibrate_iceye
-
+    calibrators['saocom'] = _calibrate_saocom
+    
     calibrator = calibrators.get(mission)
 
     if calibrator is not None:
@@ -45,3 +46,7 @@ def _calibrate_kompsat(item, **kwargs):
 def _calibrate_iceye(item, **kwargs):
 
     return iceye.calibrate(item, **kwargs)
+
+def _calibrate_saocom(item, **kwargs):
+
+    return saocom.calibrate(item, **kwargs)
