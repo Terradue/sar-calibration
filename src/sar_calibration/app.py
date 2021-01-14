@@ -3,9 +3,10 @@ import sys
 import logging
 import click
 from click2cwl import dump
-
+from pystac import Catalog, CatalogType
 from .stachelp import get_item
 from .calibrator import Calibrator
+
 
 logging.basicConfig(stream=sys.stderr, 
                     level=logging.DEBUG,
@@ -44,11 +45,24 @@ def main(ctx, input_path):
 
     output_dir = f'{item.id}'
 
-    os.mkdir(output_dir)
-
     calibrator = Calibrator()
 
-    out_item = calibrator.calibrate(item)
+    item_out = calibrator.calibrate(item)
+
+    logging.info('STAC')
+
+    cat = Catalog(id='catalog',
+                  description="Calibrated sar product")
+
+    cat.add_items([item_out])
+
+    cat.normalize_and_save(root_href='./',
+                           catalog_type=CatalogType.SELF_CONTAINED)
+
+    logging.info('Done!')
+
+
+    #os.mkdir(output_dir)
 
     sys.exit(0)
 

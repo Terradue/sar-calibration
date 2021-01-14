@@ -3,6 +3,7 @@ import sys
 import logging 
 from time import sleep
 from pystac import Item
+import numpy as np
 
 logging.basicConfig(stream=sys.stderr, 
                     level=logging.DEBUG,
@@ -59,10 +60,45 @@ def rescale(in_tif, out_tif):
     
     return True
 
-def stac_ify(item, in_tiff):
+def to_stac(item, in_tiff):
 
-    out_item = Item(id=item.id,
+    item_out = Item(id=item.id,
                     geometry=item.geometry,
                     bbox=item.bbox,
                     datetime=item.datetime,
                     properties=item.properties)
+
+    item_out.common_metadata.set_gsd(20)
+    item_out.common_metadata.set_constellation('sentinel-1')
+    item_out.common_metadata.set_mission('sentinel-1')
+    item_out.common_metadata.set_platform('sentinel-1{}'.format(item.id[2:3].lower()))
+
+    eo_item = extensions.eo.EOItemExt(item_out)
+
+    band = 'sigma_db_vv '
+
+    item_out.add_asset(key=band.lower(), 
+                               asset=Asset(href='{}_{}.tif'.format(item.id, band.upper()), 
+                                           media_type=MediaType.GEOTIFF,
+                                           properties={'sar:polarizations': band.lower().split('_')[1].upper()})) 
+
+
+    asset = eo_item.item.get_assets()[band.lower()]
+            
+    description = '{} for polarization channel {}{}'.format(band.lower().split('_')[0].title(), 
+                                                                    band.lower().split('_')[1].upper(), 
+                                                                    ' in {}'.format(band.lower().split('_')[2]) if len(band.lower().split('_')) == 3 else '')
+            
+    stac_band = extensions.eo.Band.create(name=band.lower(), 
+                                                   common_name=band.lower(),
+                                                   description=description)
+            #bands.append(stac_band)
+            
+    eo_item.set_bands([stac_band], asset=asset)
+
+    #eo_item.set_bands(bands)
+          
+    #eo_item.apply(bands)
+
+    return item_out
+

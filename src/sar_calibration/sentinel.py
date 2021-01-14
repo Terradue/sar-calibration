@@ -2,8 +2,9 @@ import os
 import sys
 import gdal
 import logging 
-
+from .output import rescale
 from snapista import Graph, Operator
+from pystac import Item, extensions, Asset, MediaType
 
 logging.basicConfig(stream=sys.stderr, 
                     level=logging.DEBUG,
@@ -12,7 +13,10 @@ logging.basicConfig(stream=sys.stderr,
 
 def calibrate(item):
 
-    logging(f'Calibrate Sentinel-1 GRD acquisition {item.id}')
+    logging.info(f'Calibrate Sentinel-1 GRD acquisition {item.id}')
+
+    temp_result = f"temp_{item.id}_SIGMA0_DB.tif"
+    result = f"{item.id}_SIGMA0_DB.tif"
 
     g = Graph()
 
@@ -58,11 +62,58 @@ def calibrate(item):
     )
 
     g.add_node(
-        operator=Operator("Write", file=f"{item.id}_SIGMA0_DB", formatName="GeoTIFF-BigTIFF"),
+        operator=Operator("Write", file=temp_result, formatName="GeoTIFF-BigTIFF"),
         node_id="write",
         source="terrain-correction",
     )
 
     g.run()
 
-    return g
+    rescale(temp_result, result)
+
+    item_out = to_stac(item, result)
+
+    return item_out
+
+def to_stac(item, in_tiff):
+
+    item_out = Item(id=item.id,
+                    geometry=item.geometry,
+                    bbox=item.bbox,
+                    datetime=item.datetime,
+                    properties=item.properties)
+
+    item_out.common_metadata.set_gsd(20)
+    item_out.common_metadata.set_constellation('sentinel-1')
+    item_out.common_metadata.set_mission('sentinel-1')
+    item_out.common_metadata.set_platform('sentinel-1{}'.format(item.id[2:3].lower()))
+
+    eo_item = extensions.eo.EOItemExt(item_out)
+
+    band = 'sigma_db_vv'
+
+    item_out.add_asset(key=band.lower(), 
+                               asset=Asset(href=in_tiff, 
+                                           media_type=MediaType.GEOTIFF,
+                                           properties={'sar:polarizations': band.lower().split('_')[1].upper()})) 
+
+
+    asset = eo_item.item.get_assets()[band.lower()]
+            
+    description = '{} for polarization channel {}{}'.format(band.lower().split('_')[0].title(), 
+                                                                    band.lower().split('_')[1].upper(), 
+                                                                    ' in {}'.format(band.lower().split('_')[2]) if len(band.lower().split('_')) == 3 else '')
+            
+    stac_band = extensions.eo.Band.create(name=band.lower(), 
+                                                   common_name=band.lower(),
+                                                   description=description)
+            #bands.append(stac_band)
+            
+    eo_item.set_bands([stac_band], asset=asset)
+
+    #eo_item.set_bands(bands)
+          
+    #eo_item.apply(bands)
+
+    return item_out
+
